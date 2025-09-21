@@ -1,9 +1,5 @@
 name: "Build and Deploy"
-
-description: "Build all docker images and helm charts.
-  Creates a new branch named gha-{current-branch}. Then, creates a new commit replacing the chartVersion with the commit hash.
-  If the branch already exists, then it will create only the new commit."
-
+description: "Build all docker images and helm charts. Creates a new branch named gha-{current-branch}. Then, creates a new commit replacing the chartVersion with the commit hash. If the branch already exists, then it will create only the new commit."
 inputs:
   cci_token:
     description: "CircleCI PAT used to trigger the pipeline. It must be a PAT instead of project token"
@@ -42,23 +38,20 @@ inputs:
     description: "Name of the product`s job that build and push the application`s docker image"
     required: true
     default: "docker-build-and-push"
-
 runs:
   using: composite
   steps:
     - name: "Checkout actions"
       uses: actions/checkout@v3
-
     - name: "Trigger CircleCI Build"
-      uses: labforward/platform-gha/circleci/trigger@1
+      uses: labfolder/platform-gha/circleci/trigger@1
       with:
         cci_token: ${{ inputs.cci_token }}
         wait_for_cci_result: true
         build_param: ${{ inputs.build_param }}
         docker_build_job_name: ${{ inputs.docker_build_job_name }}
-
     - name: "Create platform-deployment Branch"
-      uses: labforward/platform-gha/platform/branch/create@1
+      uses: labfolder/platform-gha/platform/branch/create@1
       with:
         gh_pat: ${{ inputs.gh_pat }}
         apps: ${{ inputs.apps }}
