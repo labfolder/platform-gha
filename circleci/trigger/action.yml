@@ -31,7 +31,7 @@ runs:
       id: trigger_cci
       run: |
         export CIRCLE_V2_TOKEN=CCIPAT_RRpPzMAuryJfNHQAxNvBmz_e9e1ea64d666edf275d17b7bdd1bd76a5c280008
-        PROJECT_SLUG="circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV"
+        export PROJECT_SLUG=circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
 
         curl https://circleci.com/api/v2/me --header "Circle-Token: ${CIRCLE_V2_TOKEN}"
