@@ -33,16 +33,22 @@ runs:
         PROJECT_SLUG="circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV"
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
 
+        curl https://circleci.com/api/v2/me --header "Circle-Token: $CIRCLE_V2_TOKEN"
+
+        curl -sS -u "${{ inputs.cci_token }}": --header "Content-Type: application/json" \
+          -d "{\"branch\":\"${{ inputs.branch }}\",\"parameters\": {\"${{ inputs.build_param }}\": true}}" \
+          https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline | jq -r '.id'
+          
         RESPONSE=$(curl -sS -u "${{ inputs.cci_token }}": --header "Content-Type: application/json" \
           -d "{\"branch\":\"${{ inputs.branch }}\",\"parameters\": {\"${{ inputs.build_param }}\": true}}" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline | jq -r '.id')
-
+        echo "response: ${RESPONSE}"
         echo "::set-output name=cci_response::${RESPONSE}"
     - name: Wait for CircleCI Build Workflow.
       if: ${{ inputs.wait_for_cci_result }}
       shell: bash
       env:
         CCI_RESPONSE: ${{steps.trigger_cci.outputs.cci_response}}
-        CCI_TOKEN: ${{ inputs.cci_token }}
+        CCI_TOKEN: CCIPAT_RRpPzMAuryJfNHQAxNvBmz_e9e1ea64d666edf275d17b7bdd1bd76a5c280008
         CCI_BUILD_NAME: ${{ inputs.docker_build_job_name }}
       run: "echo \"Waiting 30 seconds before start checking CircleCI status.\"\necho \"Check on https://app.circleci.com/pipelines/${PROJECT_SLUG}\"\nsleep 60\ncurl_status=\"(curl -sS \\\"https://circleci.com/api/v2/pipeline/$CCI_RESPONSE/workflow?circle-token=$CCI_TOKEN\\\" | jq -Mre \\\".items[] | select(.name == \\\\\\\"${CCI_BUILD_NAME}\\\\\\\") | .status\\\"  || echo 'circleci_curl_fail')\" \nSTATUS='running'\nwhile [[ $STATUS = 'running' ]]; do\n  echo \"Pipeline status is $STATUS\"\n  sleep 10\n  STATUS=$(eval $curl_status)\n  if [[ $STATUS = 'circleci_curl_fail' ]]; then\n    sleep 5\n    STATUS=$(eval $curl_status)\n  fi\ndone\n\nif [[ $STATUS = 'success' ]]; then\n  echo 'Build completed successfully!'\n  exit 0\nfi\necho $STATUS\necho 'Build failed'\nexit 1\n"
