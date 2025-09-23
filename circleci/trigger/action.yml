@@ -36,9 +36,8 @@ runs:
         REQUEST_PARAMS='{\"definition_id\": \"3736b82a-cefd-46a2-b50d-96291ec9099b\", \"config\": {\"branch\": \"$CIRCLE_BRANCH\"}, \"checkout\": {\"branch\": \"$CIRCLE_BRANCH\"}, \"parameters\": {\"${{ inputs.build_param }}\": true}}'
         
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
-
-        curl https://circleci.com/api/v2/me --header "Circle-Token: ${CCI_TOKEN}"
-        curl --header "Content-Type: application/json" \
+        echo $REQUEST_PARAMS
+        curl -v --header "Content-Type: application/json" \
           --header "Circle-Token: ${CCI_TOKEN}" \
           -d "$REQUEST_PARAMS" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline/run
