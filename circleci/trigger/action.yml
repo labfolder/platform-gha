@@ -36,17 +36,12 @@ runs:
         REQUEST_PARAMS='{\"definition_id\": \"3736b82a-cefd-46a2-b50d-96291ec9099b\", \"config\": {\"branch\": \"$GITHUB_REF_NAME\"}, \"checkout\": {\"branch\": \"$GITHUB_REF_NAME\"}, \"parameters\": {\"${{ inputs.build_param }}\": true}}'
         
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
-        echo $REQUEST_PARAMS
+        
         eval echo "$REQUEST_PARAMS" > pipelineparams.json
-        curl -v --header "Content-Type: application/json" \
-          --header "Circle-Token: ${CCI_TOKEN}" \
-          -d @pipelineparams.json \
-          https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline/run
         RESPONSE=$(curl --header "Content-Type: application/json" \
           --header "Circle-Token: ${CCI_TOKEN}" \
           -d @pipelineparams.json \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline/run | jq -r '.id')
-        echo "response: ${RESPONSE}"
         echo "CCI_RESPONSE=${RESPONSE}" >> "$GITHUB_OUTPUT"
     - name: Wait for CircleCI Build Workflow.
       if: ${{ inputs.wait_for_cci_result }}
@@ -57,9 +52,9 @@ runs:
         CCI_BUILD_NAME: ${{ inputs.docker_build_job_name }}
       run: 
         PROJECT_SLUG=circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV
-        echo "response:${CCI_RESPONSE}"
-        echo "Waiting 30 seconds before start checking CircleCI status."
-        echo "Check on https://app.circleci.com/pipelines/${PROJECT_SLUG}"
+        echo "response:${CCI_RESPONSE}\n"
+        echo "Waiting 30 seconds before start checking CircleCI status.\n"
+        echo "Check on https://app.circleci.com/pipelines/$PROJECT_SLUG\n"
         sleep 60
         
         curl_status="(curl -sS \"https://circleci.com/api/v2/pipeline/$CCI_RESPONSE/workflow?circle-token=$CCI_TOKEN\" | jq -Mre \".items[] | select(.name == \\\"${CCI_BUILD_NAME}\\\") | .status\"  || echo 'circleci_curl_fail')" 
