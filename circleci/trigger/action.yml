@@ -38,8 +38,12 @@ runs:
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
 
         curl https://circleci.com/api/v2/me --header "Circle-Token: ${CCI_TOKEN}"
-
-        RESPONSE=$(curl -sS -u "${CCI_TOKEN}": --header "Content-Type: application/json" \
+        curl --header "Content-Type: application/json" \
+          --header "Circle-Token: ${CCI_TOKEN}" \
+          -d "$REQUEST_PARAMS" \
+          https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline/run
+        RESPONSE=$(curl --header "Content-Type: application/json" \
+          --header "Circle-Token: ${CCI_TOKEN}" \
           -d "$REQUEST_PARAMS" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline/run | jq -r '.id')
         echo "response: ${RESPONSE}"
