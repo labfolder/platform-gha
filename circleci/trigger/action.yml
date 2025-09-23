@@ -50,14 +50,4 @@ runs:
         CCI_RESPONSE: ${{steps.trigger_cci.outputs.CCI_RESPONSE}}
         CCI_TOKEN: ${{ inputs.cci_token }}
         CCI_BUILD_NAME: ${{ inputs.docker_build_job_name }}
-      run: 
-        PIPELINE=https://app.circleci.com/pipelines/circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV
-        echo "response:${CCI_RESPONSE}"
-        echo "Waiting 30 seconds before start checking CircleCI status."
-        sleep 60
-        echo https://circleci.com/api/v2/pipeline/$CCI_RESPONSE/workflow
-        echo https://circleci.com/api/v2/pipeline/${CCI_RESPONSE}/workflow
-        curl -v --header "Circle-Token:${CCI_TOKEN}" \"https://circleci.com/api/v2/pipeline/$CCI_RESPONSE/workflow\"
-        echo 'Build failed'
-        exit 1
-
+      run: "echo \"Waiting 30 seconds before start checking CircleCI status.\"\necho \"Check on https://app.circleci.com/pipelines/${PROJECT_SLUG}\"\nsleep 60\ncurl_status=\"(curl -sS --header \\\"Content-Type: application/json\\\" --header \\\"Circle-Token: ${CCI_TOKEN}\\\" \\\"https://circleci.com/api/v2/pipeline/$CCI_RESPONSE/workflow\\\" | jq -Mre \\\".items[] | select(.name == \\\\\\\"${CCI_BUILD_NAME}\\\\\\\") | .status\\\"  || echo 'circleci_curl_fail')\" \nSTATUS='running'\nwhile [[ $STATUS = 'running' ]]; do\n  echo \"Pipeline status is $STATUS\"\n  sleep 10\n  STATUS=$(eval $curl_status)\n  if [[ $STATUS = 'circleci_curl_fail' ]]; then\n    sleep 5\n    STATUS=$(eval $curl_status)\n  fi\ndone\n\nif [[ $STATUS = 'success' ]]; then\n  echo 'Build completed successfully!'\n  exit 0\nfi\necho $STATUS\necho 'Build failed'\nexit 1\n"
