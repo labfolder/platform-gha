@@ -54,6 +54,7 @@ runs:
         CCI_TOKEN: ${{ inputs.cci_token }}
         CCI_BUILD_NAME: ${{ inputs.docker_build_job_name }}
       run: 
+        export PROJECT_SLUG=circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV
         echo "response:${CCI_RESPONSE}"
         echo "Waiting 30 seconds before start checking CircleCI status."
         echo "Check on https://app.circleci.com/pipelines/${PROJECT_SLUG}"
