@@ -29,18 +29,19 @@ runs:
     - name: Trigger CircleCI Build Workflow.
       shell: bash
       id: trigger_cci
+      env:
+        CCI_TOKEN: ${{ inputs.cci_token }}
       run: |
-        export CIRCLE_V2_TOKEN=CCIPAT_RRpPzMAuryJfNHQAxNvBmz_e9e1ea64d666edf275d17b7bdd1bd76a5c280008
         export PROJECT_SLUG=circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
 
-        curl https://circleci.com/api/v2/me --header "Circle-Token: ${CIRCLE_V2_TOKEN}"
+        curl https://circleci.com/api/v2/me --header "Circle-Token: ${CCI_TOKEN}"
 
-        curl -sS -u "${CIRCLE_V2_TOKEN}": --header "Content-Type: application/json" \
+        curl -sS -u "${CCI_TOKEN}": --header "Content-Type: application/json" \
           -d "{\"branch\":\"${{ inputs.branch }}\",\"parameters\": {\"${{ inputs.build_param }}\": true}}" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline | jq -r '.id'
           
-        RESPONSE=$(curl -sS -u "${CIRCLE_V2_TOKEN}": --header "Content-Type: application/json" \
+        RESPONSE=$(curl -sS -u "${CCI_TOKEN}": --header "Content-Type: application/json" \
           -d "{\"branch\":\"${{ inputs.branch }}\",\"parameters\": {\"${{ inputs.build_param }}\": true}}" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline | jq -r '.id')
         echo "response: ${RESPONSE}"
@@ -50,13 +51,13 @@ runs:
       shell: bash
       env:
         CCI_RESPONSE: ${{steps.trigger_cci.outputs.cci_response}}
-        CCI_TOKEN: CCIPAT_RRpPzMAuryJfNHQAxNvBmz_e9e1ea64d666edf275d17b7bdd1bd76a5c280008
+        CCI_TOKEN: ${{ inputs.cci_token }}
         CCI_BUILD_NAME: ${{ inputs.docker_build_job_name }}
       run: 
         echo "Waiting 30 seconds before start checking CircleCI status."
         echo "Check on https://app.circleci.com/pipelines/{$PROJECT_SLUG}"
         sleep 60
-        export CIRCLE_V2_TOKEN=CCIPAT_RRpPzMAuryJfNHQAxNvBmz_e9e1ea64d666edf275d17b7bdd1bd76a5c280008
+        
         curl_status="(curl -sS \"https://circleci.com/api/v2/pipeline/$CCI_RESPONSE/workflow?circle-token=$CCI_TOKEN\" | jq -Mre \".items[] | select(.name == \\\"${CCI_BUILD_NAME}\\\") | .status\"  || echo 'circleci_curl_fail')" 
         STATUS='running'
         while [[ $STATUS = 'running' ]]; do
