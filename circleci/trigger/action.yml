@@ -45,15 +45,16 @@ runs:
           -d "{\"branch\":\"${{ inputs.branch }}\",\"parameters\": {\"${{ inputs.build_param }}\": true}}" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline | jq -r '.id')
         echo "response: ${RESPONSE}"
-        echo "::set-output name=cci_response::${RESPONSE}"
+        echo "CCI_RESPONSE=${RESPONSE}" >> "$GITHUB_OUTPUT"
     - name: Wait for CircleCI Build Workflow.
       if: ${{ inputs.wait_for_cci_result }}
       shell: bash
       env:
-        CCI_RESPONSE: ${{steps.trigger_cci.outputs.cci_response}}
+        CCI_RESPONSE: ${{steps.trigger_cci.outputs.CCI_RESPONSE}}
         CCI_TOKEN: ${{ inputs.cci_token }}
         CCI_BUILD_NAME: ${{ inputs.docker_build_job_name }}
       run: 
+        echo "response:${CCI_RESPONSE}"
         echo "Waiting 30 seconds before start checking CircleCI status."
         echo "Check on https://app.circleci.com/pipelines/{$PROJECT_SLUG}"
         sleep 60
