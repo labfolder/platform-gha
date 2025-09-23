@@ -33,14 +33,14 @@ runs:
         CCI_TOKEN: ${{ inputs.cci_token }}
       run: |
         PROJECT_SLUG=circleci/5JBARKjC9duevdMYTL5Eit/DxsBAJbPyXpz8qNfxBcuAV
-        REQUEST_PARAMS='{\"definition_id\": \"3736b82a-cefd-46a2-b50d-96291ec9099b\", \"config\": {\"branch\": \"$CIRCLE_BRANCH\"}, \"checkout\": {\"branch\": \"$CIRCLE_BRANCH\"}, \"parameters\": {\"${{ inputs.build_param }}\": true} }'
-  
+        REQUEST_PARAMS='{\"definition_id\": \"3736b82a-cefd-46a2-b50d-96291ec9099b\", \"config\": {\"branch\": \"$CIRCLE_BRANCH\"}, \"checkout\": {\"branch\": \"$CIRCLE_BRANCH\"}, \"parameters\": {\"${{ inputs.build_param }}\": true}}'
+        
         echo "Triggering pipeline using the {${{ inputs.build_param }}} parameter in the {${{ inputs.branch }}} branch for the {$PROJECT_SLUG} project SLUG."
 
         curl https://circleci.com/api/v2/me --header "Circle-Token: ${CCI_TOKEN}"
 
         RESPONSE=$(curl -sS -u "${CCI_TOKEN}": --header "Content-Type: application/json" \
-          -d "${REQUEST_PARAMS}" \
+          -d "$REQUEST_PARAMS" \
           https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline/run | jq -r '.id')
         echo "response: ${RESPONSE}"
         echo "CCI_RESPONSE=${RESPONSE}" >> "$GITHUB_OUTPUT"
